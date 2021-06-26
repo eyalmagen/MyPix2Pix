@@ -1,9 +1,11 @@
 import torch
 from .base_model import BaseModel
 from . import networks
+# from torchvision import transforms # uncomment when you want to create an image:
+# transforms.ToPILImage()(self.real_B[1]).save("d:\\temp\\self__real_B.png")
+import pychubby
 
-
-class Pix2PixModel(BaseModel):
+class Pix2PixModifiedLossModel(BaseModel):
     """ This class implements the pix2pix model, for learning a mapping from input images to output images given paired data.
 
     The model training requires '--dataset_mode aligned' dataset.
@@ -108,6 +110,7 @@ class Pix2PixModel(BaseModel):
         pred_fake = self.netD(fake_AB)
         self.loss_G_GAN = self.criterionGAN(pred_fake, True)
         print(f"self.loss_G_GAN: {self.loss_G_GAN}")
+
         # Second, G(A) = B
         self.loss_G_L1 = self.criterionL1(self.fake_B, self.real_B) * self.opt.lambda_L1
         print(f"self.loss_G_L1: {self.loss_G_L1}")
