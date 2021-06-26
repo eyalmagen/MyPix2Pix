@@ -127,10 +127,10 @@ class Pix2PixModifiedLossModel(BaseModel):
     def find_mouth_area_box(lf):
         points_names = ["OUTER_EYE_BOTTOM_L", "OUTER_EYE_BOTTOM_R", "LOWERMOST_NOSE"]
         points = [lf[name] for name in points_names]
-        x1 = lf["OUTER_OUTSIDE_UPPER_LIP_L"]  # left
-        x2 = lf["OUTER_OUTSIDE_LOWER_LIP_R"]  # right
-        y1 = lf["INNER_OUTSIDE_UPPER_LIP_R"]  # top
-        y2 = lf["INNER_OUTSIDE_LOWER_LIP_L"]  # bottom
+        x1 = lf["OUTER_OUTSIDE_UPPER_LIP_L"][1]  # left
+        x2 = lf["OUTER_OUTSIDE_LOWER_LIP_R"][1]  # right
+        y1 = lf["INNER_OUTSIDE_UPPER_LIP_R"][0]  # top
+        y2 = lf["INNER_OUTSIDE_LOWER_LIP_L"][0]  # bottom
         return x1, x2, y1, y2
 
     def calc_mouth_area_loss(self):
