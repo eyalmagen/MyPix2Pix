@@ -1,9 +1,9 @@
 import torch
+from pychubby.detect import LANDMARK_NAMES
+
 from .base_model import BaseModel
 from . import networks
-from torchvision import transforms
-from pychubby.detect import LandmarkFace
-import numpy as np
+# from torchvision import transforms # transforms.ToPILImage()(image)
 
 
 class Pix2PixModifiedLossModel(BaseModel):
@@ -85,6 +85,7 @@ class Pix2PixModifiedLossModel(BaseModel):
         AtoB = self.opt.direction == 'AtoB'
         self.real_A = input['A' if AtoB else 'B'].to(self.device)
         self.real_B = input['B' if AtoB else 'A'].to(self.device)
+        self.points = input["P"]
         self.image_paths = input['A_paths' if AtoB else 'B_paths']
 
     def forward(self):
@@ -124,13 +125,11 @@ class Pix2PixModifiedLossModel(BaseModel):
         self.loss_G.backward()
 
     @staticmethod
-    def find_mouth_area_box(lf):
-        points_names = ["OUTER_EYE_BOTTOM_L", "OUTER_EYE_BOTTOM_R", "LOWERMOST_NOSE"]
-        points = [lf[name] for name in points_names]
-        x1 = lf["OUTER_OUTSIDE_UPPER_LIP_L"][1]  # left
-        x2 = lf["OUTER_OUTSIDE_LOWER_LIP_R"][1]  # right
-        y1 = lf["INNER_OUTSIDE_UPPER_LIP_R"][0]  # top
-        y2 = lf["INNER_OUTSIDE_LOWER_LIP_L"][0]  # bottom
+    def find_mouth_area_box(points):
+        x1 = points[LANDMARK_NAMES["OUTER_OUTSIDE_UPPER_LIP_L"]][1]  # left
+        x2 = points[LANDMARK_NAMES["OUTER_OUTSIDE_LOWER_LIP_R"]][1]  # right
+        y1 = points[LANDMARK_NAMES["INNER_OUTSIDE_LOWER_LIP_L"]][0]  # top
+        y2 = points[LANDMARK_NAMES["INNER_OUTSIDE_UPPER_LIP_R"]][0]  # bottom
         return x1, x2, y1, y2
 
     def calc_mouth_area_loss(self):
@@ -138,10 +137,11 @@ class Pix2PixModifiedLossModel(BaseModel):
         for i in range(len(self.real_A)):
             fake_b = self.fake_B[i]
             real_b = self.real_B[i]
-            lf = LandmarkFace.estimate(np.asarray(transforms.ToPILImage()(real_b.cpu())))
-            x1, x2, y1, y2 = self.find_mouth_area_box(lf)
-            mouth_box_fake_b = fake_b[:, x1:x2, y1:y2]
-            mouth_box_real_b = real_b[:, x1:x2, y1:y2]
+            points = self.points[i]
+            x1, x2, y1, y2 = self.find_mouth_area_box(points)
+            padding = 24
+            mouth_box_fake_b = fake_b[:, x1-padding:x2+padding, y1-padding:y2+padding]
+            mouth_box_real_b = real_b[:, x1-padding:x2+padding, y1-padding:y2+padding]
             mouth_area_loss += self.criterionL1(mouth_box_fake_b, mouth_box_real_b) * self.opt.lambda_L1
         return mouth_area_loss
 

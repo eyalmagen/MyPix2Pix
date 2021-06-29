@@ -49,13 +49,13 @@ class WithPointsDataset(BaseDataset):
         B = Image.open(B_path).convert('RGB')
         P = np.load(P_path)
 
-        # apply the same transform to both A and B
-        A_transform = B_transform = get_transform_modified()
+        # apply the same transform to both A and B. its only to_tensor and normalize
+        transform = get_transform_modified()
 
-        A = A_transform(A)
-        B = B_transform(B)
+        A = transform(A)
+        B = transform(B)
 
-        return {'A': A, 'B': B, 'A_paths': AB_path, 'B_paths': AB_path}
+        return {'A': A, 'B': B, 'P': P, 'A_paths': AB_path, 'B_paths': AB_path}
 
     def __len__(self):
         """Return the total number of images in the dataset."""
