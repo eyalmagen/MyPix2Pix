@@ -1,11 +1,11 @@
 import os
+from glob import glob
 
+import numpy as np
 from PIL import Image
 
-from data.base_dataset import BaseDataset, get_params, get_transform
+from data.base_dataset import BaseDataset, get_transform_modified
 from data.image_folder import make_dataset_with_points
-from glob import glob
-import numpy as np
 
 
 class WithPointsDataset(BaseDataset):
@@ -24,7 +24,7 @@ class WithPointsDataset(BaseDataset):
         BaseDataset.__init__(self, opt)
         self.dir_AB = os.path.join(opt.dataroot, opt.phase)  # get the image directory
         self.AB_paths = sorted(make_dataset_with_points(self.dir_AB, opt.max_dataset_size))  # get image paths
-        assert(self.opt.load_size >= self.opt.crop_size)   # crop_size should be smaller than the size of loaded image
+        assert (self.opt.load_size >= self.opt.crop_size)  # crop_size should be smaller than the size of loaded image
         self.input_nc = self.opt.output_nc if self.opt.direction == 'BtoA' else self.opt.input_nc
         self.output_nc = self.opt.input_nc if self.opt.direction == 'BtoA' else self.opt.output_nc
 
@@ -50,8 +50,7 @@ class WithPointsDataset(BaseDataset):
         P = np.load(P_path)
 
         # apply the same transform to both A and B
-        transform_params = get_params(self.opt, A.size)
-        A_transform = B_transform = get_transform(self.opt, transform_params)
+        A_transform = B_transform = get_transform_modified()
 
         A = A_transform(A)
         B = B_transform(B)
