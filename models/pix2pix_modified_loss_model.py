@@ -1,5 +1,4 @@
 import torch
-from pychubby.detect import LANDMARK_NAMES
 
 from .base_model import BaseModel
 from . import networks
@@ -126,10 +125,10 @@ class Pix2PixModifiedLossModel(BaseModel):
 
     @staticmethod
     def find_mouth_area_box(points):
-        x1 = points[LANDMARK_NAMES["OUTER_OUTSIDE_UPPER_LIP_L"]][1]  # left
-        x2 = points[LANDMARK_NAMES["OUTER_OUTSIDE_LOWER_LIP_R"]][1]  # right
-        y1 = points[LANDMARK_NAMES["INNER_OUTSIDE_LOWER_LIP_L"]][0]  # top
-        y2 = points[LANDMARK_NAMES["INNER_OUTSIDE_UPPER_LIP_R"]][0]  # bottom
+        x1 = points[49][1]  # left,"OUTER_OUTSIDE_UPPER_LIP_L"
+        x2 = points[55][1]  # right, "OUTER_OUTSIDE_LOWER_LIP_R"
+        y1 = points[58][0]  # top, "INNER_OUTSIDE_LOWER_LIP_L"
+        y2 = points[52][0]  # bottom, "INNER_OUTSIDE_UPPER_LIP_R"
         return x1, x2, y1, y2
 
     def calc_mouth_area_loss(self):
